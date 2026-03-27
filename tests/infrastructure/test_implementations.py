@@ -1,6 +1,8 @@
 import pytest
+from unittest.mock import Mock, patch
 from src.infrastructure.embedding.sentence_transformers_embedding import SentenceTransformersEmbedding
 from src.infrastructure.vectorstore.chromadb_store import ChromaDBStore
+from src.infrastructure.llm.ollama_llm import OllamaLLM
 from src.domain.entities.chunk import Chunk
 
 
@@ -25,3 +27,12 @@ def test_chromadb_store_add_and_search():
     assert len(results) == 1
     assert results[0].id == "chunk-1"
     store.clear()
+
+
+def test_ollama_llm_generate():
+    with patch("src.infrastructure.llm.ollama_llm.ollama") as mock_ollama:
+        mock_ollama.chat.return_value = {"message": {"content": "Test response"}}
+        llm = OllamaLLM()
+        result = llm.generate("Question?", "Context")
+        assert result == "Test response"
+        mock_ollama.chat.assert_called_once()
