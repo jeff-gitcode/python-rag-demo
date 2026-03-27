@@ -1,9 +1,12 @@
 import pytest
+import tempfile
+import os
 from unittest.mock import Mock, patch
 from src.infrastructure.embedding.sentence_transformers_embedding import SentenceTransformersEmbedding
 from src.infrastructure.vectorstore.chromadb_store import ChromaDBStore
 from src.infrastructure.llm.ollama_llm import OllamaLLM
 from src.domain.entities.chunk import Chunk
+from src.infrastructure.loader.text_file_loader import TextFileLoader
 
 
 def test_embedding_service_embed_text():
@@ -36,3 +39,17 @@ def test_ollama_llm_generate():
         result = llm.generate("Question?", "Context")
         assert result == "Test response"
         mock_ollama.chat.assert_called_once()
+
+
+def test_text_file_loader():
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+        f.write("Test content")
+        temp_path = f.name
+    
+    try:
+        loader = TextFileLoader()
+        doc = loader.load(temp_path)
+        assert doc.content == "Test content"
+        assert doc.source_path == temp_path
+    finally:
+        os.unlink(temp_path)
