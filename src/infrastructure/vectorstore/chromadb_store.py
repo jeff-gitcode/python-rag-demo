@@ -13,6 +13,7 @@ class ChromaDBStore(DocumentRepository):
         self.collection.add(
             ids=[chunk.id],
             documents=[chunk.content],
+            embeddings=[chunk.embedding],
             metadatas=[{"document_id": chunk.document_id}]
         )
 
